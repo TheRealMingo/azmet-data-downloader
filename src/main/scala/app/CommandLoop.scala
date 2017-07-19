@@ -29,19 +29,30 @@ object CommandLoop {
     "Note: type refers to a combination of <raw|standard> <hourly|daily|weekly> example raw hourly"
 
 
-  private[app] def argsAreValid(args: String) : Boolean = {
-    val allYearsForStations : Boolean = args.matches(AllYearsForStations.regex)
-    val oneYearForStations : Boolean = args.matches(OneYearForStations.regex)
-    val multiYearForStations : Boolean = args.matches(MultiYearForStations.regex)
-    val yearIntervalForStations : Boolean = args.matches(YearIntervalForStations.regex)
-    val exit : Boolean = args.matches(Exit.regex)
-    val help : Boolean = args.matches(Help.regex)
-    val list : Boolean = args.matches(ListStations.regex)
+  /** Determines whether a commend is valid
+    *
+    * @param command The command to check for validity
+    * @return True if the command is valid, false otherwise
+    * */
+  private def commmandIsValid(command: String) : Boolean = {
+    val allYearsForStations : Boolean = command.matches(AllYearsForStations.regex)
+    val oneYearForStations : Boolean = command.matches(OneYearForStations.regex)
+    val multiYearForStations : Boolean = command.matches(MultiYearForStations.regex)
+    val yearIntervalForStations : Boolean = command.matches(YearIntervalForStations.regex)
+    val exit : Boolean = command.matches(Exit.regex)
+    val help : Boolean = command.matches(Help.regex)
+    val list : Boolean = command.matches(ListStations.regex)
 
     allYearsForStations || oneYearForStations || multiYearForStations ||
       yearIntervalForStations || exit || help || list
   }
 
+  /** Given a type and a timeframe return the corresponding FileType
+    *
+    * @param theType The type either raw or standard
+    * @param timeFrame The timeframe either hourly, daily, or monthly
+    * @return An Option representing the FileType, returns None if the file type doesn't exist
+    * */
   private def getFileType(theType: String, timeFrame: String) : Option[FileType.Value] = {
     theType match{
       case "raw" if timeFrame == "hourly" => Some(FileType.RawHourly)
@@ -54,12 +65,25 @@ object CommandLoop {
   }
 
 
+  /** Takes the arguments and convert them to types that can be better used to download data from the archive
+    *
+    * @param stations A string representing the data to download
+    * @param theType A string representing the type (ex. raw hourly)
+    * @param timeFrame A string representing the time frame
+    * @return A tuple with the first argument being a list of the stations to download and the second being a type (ex. standard weekly)
+    * */
   private def parseArgs(stations: String, theType: String, timeFrame: String) : (List[String], Option[FileType.Value]) =  {
     val theStations : List[String] = stations.split("\\s").toList
     val fileType : Option[FileType.Value] = getFileType(theType, timeFrame)
     (theStations, fileType)
   }
 
+  /** Given a list of stations, file type, and years download the corresponding data from the AZMET Archive
+    *
+    * @param stations The stations to download
+    * @param fileType The type to download (ie raw hourly)
+    * @param theYears The list of years to download
+    * */
   private def runDownloaderForCommand(stations: List[String], fileType: Option[FileType.Value], theYears : List[Int]) : Unit = {
     if(fileType.isDefined){
       val stationNumbers : List[Int] = stations.map(station => Stations.stationNumber(station.capitalize))
@@ -70,7 +94,13 @@ object CommandLoop {
     }
   }
 
+
+  /** Lists all of the stations
+    *
+    * @param stations The stations of the program
+    * */
   private def listStations(stations: List[String]): Unit ={
+    @tailrec
     def listStationsHelper(stations: List[String], counter: Int) : Unit = {
       if(stations.nonEmpty){
         println("(" + counter + ") " + stations.head)
@@ -80,6 +110,10 @@ object CommandLoop {
     listStationsHelper(stations.sorted, 1)
   }
 
+  /** Runs a given command
+    *
+    * @param command The command to be ran
+    * */
   private def runCommand(command : String) : Boolean = {
     command match {
       case Exit(e) => false
@@ -108,12 +142,17 @@ object CommandLoop {
     }
   }
 
+
+  /** The main loop of the program
+    *
+    * @param loop Determines whether to keep the program running
+    * */
   @tailrec
   def runLoop(loop: Boolean) : Unit = {
     if(loop){
       print(">")
       val command : String = readLine
-      if(argsAreValid(command.trim)){
+      if(commmandIsValid(command.trim)){
         val runAgain : Boolean = runCommand(command)
         runLoop(runAgain)
       }

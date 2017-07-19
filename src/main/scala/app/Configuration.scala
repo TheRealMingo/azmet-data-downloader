@@ -1,6 +1,6 @@
 package app
 
-import java.io.{File, FileInputStream, FileNotFoundException}
+import java.io.File
 import java.util.Properties
 
 object Configuration {

@@ -19,10 +19,27 @@ object Downloader {
   private val zero = "0"
   private val underscore = "_"
 
+  /** Given a number determine whether it is an one digit number
+    *
+    * @param number The number to determine is one digit
+    * @return True if the number is an one digit number, false otherwise
+    * */
   private def isOneDigit(number: Int) : Boolean = number/10 == 0
 
+  /** Given a year, shorten it to a two representation
+    *
+    * @param year The year to shorten
+    * @return An Int representing that shorten year
+    * */
   private def shortenYear(year: Int) : Int = year % 100
 
+  /** Given a file type, a station number, and year determine what the filename is in the AZMET data archive
+    *
+    * @param fileType The file type
+    * @param station The station number
+    * @param year The year
+    * @return A string representing the filename
+    * */
   private def acquireFileName(fileType: FileType.Value, station: Int, year: Int) : String = {
     val stationName: String = Stations.stationName(station)
 
@@ -35,13 +52,30 @@ object Downloader {
     }
   }
 
-  private def acquireFullUrl(sYearIsOneDigit: Boolean, stationIsOneDigit: Boolean, station: Int, sYear: Int, extension: String) : String = sYearIsOneDigit match{
-    case true if stationIsOneDigit => baseUrl + zero + station + zero + sYear + extension
-    case true if !stationIsOneDigit => baseUrl + station + zero + sYear + extension
-    case false if stationIsOneDigit => baseUrl + zero + station + sYear + extension
-    case false if !stationIsOneDigit => baseUrl + station + sYear + extension
+  /** Given year information and station information determine the url that represents that in the AZMET data archive
+    *
+    * @param sYearIsOneDigit true if the year is an one digit number, false otherwise
+    * @param stationIsOneDigit true if station number is an one digit number, false otherwise
+    * @param station The station number
+    * @param sYear The year desired for that station
+    * @param extension The filename extension
+    * @return The url representing the url in the AZMET data archive
+    * */
+  private def acquireFullUrl(sYearIsOneDigit: Boolean, stationIsOneDigit: Boolean, station: Int, sYear: Int, extension: String) : String = {
+    sYearIsOneDigit match {
+      case true if stationIsOneDigit => baseUrl + zero + station + zero + sYear + extension
+      case true if !stationIsOneDigit => baseUrl + station + zero + sYear + extension
+      case false if stationIsOneDigit => baseUrl + zero + station + sYear + extension
+      case false if !stationIsOneDigit => baseUrl + station + sYear + extension
+    }
   }
 
+  /** Download the data from the AZMET Data Archive
+    *
+    * @param station The station number
+    * @param year The year
+    * @param fileType The file type
+    * */
   def downloadData(station: Int, year: Int, fileType: FileType.Value) : Unit = {
     val sYear : Int = shortenYear(year)
     val sYearIsOneDigit : Boolean = isOneDigit(sYear)
@@ -75,6 +109,11 @@ object Downloader {
     println("Data Retrieved for station" + stationNamePrettyPrint + ".")
   }
 
+  /** Given an year, download all the data in the year for a given type
+    *
+    * @param year The year
+    * @param fileType The fileType
+    * */
   def downloadDataFromAllStations(year: Int, fileType : FileType.Value) : Unit = {
     val stationIDs : Iterable[Int] = Stations.stationName.keys
     stationIDs.foreach((id: Int) => downloadData(id, year, fileType))
