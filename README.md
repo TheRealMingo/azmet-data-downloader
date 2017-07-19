@@ -1,4 +1,4 @@
-#Azmet Data Downloader
+# Azmet Data Downloader
 This project is to make retreiving data from theThe Arizona Meteorological Network's Data Archive easier.
 
 
