@@ -96,7 +96,7 @@ object Downloader {
     val pattern = "([A-Z])".r
     val fileTypePrettyPrint = pattern.replaceAllIn(fileType.toString, (m :Match) => " " + m.group(1).toLowerCase)
     val stationNamePrettyPrint = pattern.replaceAllIn(stationName, (m:Match) => " " + m.group(1))
-    println("Retrieving" + fileTypePrettyPrint + " data for station" + stationNamePrettyPrint +  "for year " + year + " ...")
+    println("Retrieving" + fileTypePrettyPrint + " data for station" + stationNamePrettyPrint +  " for year " + year + " ...")
 
     val content: String = {
       if (Try(Source.fromURL(url)).isSuccess) Source.fromURL(url).mkString
